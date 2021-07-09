@@ -1,0 +1,13 @@
+---
+- hosts: SOLR
+  gather_facts: False
+  user: ec2-user
+
+  tasks:
+    - name: Falcon change
+      shell: "sudo ps -ef | grep falcon-sensor  "
+      register: falcon
+  
+    - name: Show Details
+      debug: 
+        msg: "{{ falcon.stdout_lines }}"

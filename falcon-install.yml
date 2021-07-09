@@ -1,0 +1,52 @@
+#install falcon-sensor
+---
+- hosts: all
+  become: true
+  user: ec2-user
+  connection: ssh 
+  vars:
+    falcon-ubuntu-os: 
+    falcon-rhel-os: falcon-sensor-4.3.0-4603.el7.x86_64.rpm
+
+  tasks:
+    - name: Line change
+    shell: sudo ps -e | grep falcon-sensor
+    
+
+
+
+
+  - name: copying falcon-sensor file with owner and permissions
+    copy:
+      src: {{ falcon-ubuntu-os }}
+      dest: /tmp/{{ falcon-ubuntu-os }}
+      mode: 0755
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+  - name: copying falcon-sensor file with owner and permissions
+    copy:
+      src: {{ falcon-ubuntu-os }}
+      dest: /tmp/{{ falcon-rhel-os }}
+      mode: 0755
+    when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
+
+  - name: install falcon-sensor deb from a local file
+    apt: 
+      name: /tmp/{{ falcon-ubuntu-os }} 
+      state: latest
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+  - name: install falcon-sensor rpm from a local file
+    yum: 
+      name: /tmp/{{ falcon-rhel-os }} 
+      state: latest
+    when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'RedHat'
+
+  - name: Line change
+    shell: /opt/CrowdStrike/falconctl -s --cid="xxxxx-F0"
+
+  - name: restart falcon-sensor 
+    service: 
+      name: falcon-sensor 
+      state: started
+      enabled: yes
